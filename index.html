@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toby y el Corazón de Madera</title>
+<style>
+  :root{
+    --madera:#a86b3c; --madera-osc:#7a4a24; --dorado:#e8a33d; --naranja:#ff8a5b;
+    --verde:#4cc9a7; --rosa:#ff6b9d; --azul:#4ea8de; --crema:#fff3e0;
+    --texto:#3a2e22; --gris:#8a7a6a; --radio:22px; --sombra: 0 8px 24px rgba(120,70,20,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Comic Sans MS','Trebuchet MS','Segoe UI',sans-serif;
+    background:linear-gradient(160deg,#fdf1e3 0%, #fff8ec 55%, #fef0e6 100%);
+    color:var(--texto); min-height:100vh; padding-bottom:60px;
+  }
+  #rewardbar{
+    position:sticky; top:0; z-index:50; display:flex; gap:14px; align-items:center; justify-content:center;
+    flex-wrap:wrap; background:rgba(255,255,255,0.92); backdrop-filter:blur(6px);
+    padding:10px 16px; box-shadow:0 4px 14px rgba(120,70,20,0.12); border-bottom:3px solid var(--dorado);
+  }
+  .reward-chip{
+    display:flex; align-items:center; gap:6px; background:var(--crema); border-radius:30px;
+    padding:6px 14px; font-weight:bold; font-size:15px; border:2px solid #f3d9ad; transition:transform .25s;
+  }
+  .reward-chip.pop{transform:scale(1.25);}
+  #app{max-width:760px; margin:0 auto; padding:22px 18px 40px;}
+  .card{
+    background:#fff; border-radius:var(--radio); padding:26px 24px; box-shadow:var(--sombra);
+    margin-bottom:22px; animation:fadeIn .5s ease; border:3px solid #f6e6cc;
+  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);}}
+  h1{color:var(--madera-osc); font-size:26px; margin-top:0;}
+  h2{color:var(--madera-osc); font-size:21px;}
+  h3{color:var(--naranja); font-size:18px; margin-bottom:6px;}
+  p{line-height:1.65; font-size:17px;}
+  .illustration{
+    background:linear-gradient(135deg,#fff1de,#ffe9d2); border-radius:18px; padding:26px;
+    text-align:center; font-size:56px; margin-bottom:16px; border:2px dashed var(--dorado); letter-spacing:10px;
+  }
+  .illustration-caption{font-size:13px; color:var(--gris); margin-top:6px; letter-spacing:0; font-style:italic;}
+  .vocab{color:var(--rosa); font-weight:bold; cursor:pointer; border-bottom:2px dotted var(--rosa); padding:0 1px;}
+  .vocab:hover{background:#ffe9f2;}
+  button{
+    font-family:inherit; cursor:pointer; border:none; border-radius:16px; padding:12px 20px;
+    font-size:16px; font-weight:bold; transition:transform .15s, box-shadow .15s;
+  }
+  button:active{transform:scale(0.96);}
+  button:disabled{opacity:.45; cursor:not-allowed;}
+  .btn-primary{background:var(--madera); color:#fff; box-shadow:0 6px 0 var(--madera-osc);}
+  .btn-primary:hover:not(:disabled){filter:brightness(1.06);}
+  .btn-secondary{background:#fff; color:var(--madera-osc); border:2px solid var(--madera);}
+  .btn-option{
+    display:block; width:100%; text-align:left; background:var(--crema); color:var(--texto);
+    border:2px solid #f3d9ad; margin:8px 0; padding:14px 16px; border-radius:14px; font-size:16px;
+  }
+  .btn-option:hover:not(:disabled){background:#ffe6c2;}
+  .btn-option.correct{background:#d9f7ec; border-color:var(--verde); color:#1c6b52;}
+  .btn-option.wrong{background:#ffe3e3; border-color:#ff8a8a; color:#8a2b2b;}
+  .hint-box{background:#fff4e6; border-left:5px solid var(--madera); border-radius:10px; padding:10px 14px; margin:10px 0; font-size:15px;}
+  .feedback{border-radius:14px; padding:14px 16px; margin-top:12px; font-size:16px; background:#fff7e6; border:2px solid var(--dorado);}
+  .feedback.good{background:#e6fbf2; border-color:var(--verde);}
+  textarea{width:100%; min-height:90px; border-radius:14px; border:2px solid #f0dcb8; padding:12px; font-family:inherit; font-size:15px; resize:vertical;}
+  .nav-row{display:flex; gap:12px; justify-content:flex-end; margin-top:16px; flex-wrap:wrap;}
+  .badge-emoji{font-size:44px;}
+  .modal-overlay{position:fixed; inset:0; background:rgba(80,50,20,0.45); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;}
+  .modal{background:#fff; border-radius:20px; padding:24px; max-width:380px; width:100%; box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+  .modal h3{margin-top:0; color:var(--rosa);}
+  .order-item{display:flex; align-items:center; gap:10px; background:var(--crema); border:2px solid #f3d9ad; border-radius:14px; padding:10px 14px; margin:8px 0;}
+  .order-item .txt{flex:1; font-size:15px;}
+  .order-item button{padding:6px 10px; font-size:14px; border-radius:10px;}
+  .tag{display:inline-block; background:#ffe6c2; color:#7a4a00; border-radius:20px; padding:3px 12px; font-size:13px; font-weight:bold; margin-bottom:10px;}
+  .progressdots{display:flex; gap:8px; justify-content:center; margin-bottom:18px;}
+  .dot{width:12px; height:12px; border-radius:50%; background:#f3e0c2;}
+  .dot.on{background:var(--madera);}
+  ul.creative-list{padding-left:20px;}
+  ul.creative-list li{margin-bottom:8px; line-height:1.5;}
+  .center{text-align:center;}
+  .small{font-size:13px; color:var(--gris);}
+</style>
+</head>
+<body>
+<div id="rewardbar"></div>
+<div id="app"></div>
+<div id="modalRoot"></div>
+
+<script>
+const STORY_TITLE = "Toby y el Corazón de Madera";
+const AGE_RANGE = "6 a 8 años";
+
+const VOCAB = {
+  tallar: { palabra:"tallar", emoji:"🪵🔨", significado:"Dar forma a la madera cortándola poco a poco con herramientas.", ejemplo:"Elías tallaba muñecos de madera en su taller.", sinonimos:["esculpir","labrar"] },
+  feria: { palabra:"feria", emoji:"🎪🎡", significado:"Una fiesta con juegos, música y puestos de comida que llega a un pueblo por unos días.", ejemplo:"Bruno invitó a Toby a la feria que había llegado al pueblo.", sinonimos:["fiesta","carnaval"] },
+  travieso: { palabra:"travieso", emoji:"😜", significado:"Que le gusta hacer bromas o pequeñas trampas divertidas.", ejemplo:"Bruno era un mapache travieso con muchas ideas.", sinonimos:["pícaro","juguetón"] },
+  opaco: { palabra:"opaco", emoji:"🌑", significado:"Que no brilla, que ha perdido su luz o su brillo.", ejemplo:"El colgante de estrella de Toby se puso opaco cuando dijo la mentira.", sinonimos:["apagado","sin brillo"] },
+  confesar: { palabra:"confesar", emoji:"🗣️💛", significado:"Contar la verdad sobre algo que hicimos, aunque cueste trabajo.", ejemplo:"Toby decidió confesar a Elías lo que había pasado.", sinonimos:["admitir","sincerarse"] },
+  sincero: { palabra:"sincero", emoji:"💛", significado:"Que dice siempre la verdad, sin engañar a nadie.", ejemplo:"Elías le dijo que lo más importante era tener un corazón sincero.", sinonimos:["honesto","veraz"] }
+};
+
+const SCENES = [
+{
+  id:1,
+  resumen:"Elías talla a Toby de una rama de roble y una estrella fugaz le da un colgante mágico.",
+  illEmoji:"🪵🧙🔨✨",
+  illDesc:"Un carpintero anciano de barba blanca y delantal de cuero, llamado Elías, tallando con cariño un pequeño muñeco de madera en su taller iluminado por velas. Por la ventana se ve una estrella fugaz cruzando el cielo nocturno. Colores cálidos, madera clara, luz dorada.",
+  html:`En un pequeño taller lleno de virutas de madera, el carpintero Elías <span class="vocab" data-word="tallar">talló</span> con mucho cariño un muñeco a partir de una rama de roble caída por la tormenta. Le pintó unos ojos curiosos y una sonrisa alegre, y lo llamó Toby. —Ojalá pudieras acompañarme siempre, pequeño amigo —suspiró Elías, que vivía solo desde hacía muchos años.
+  <br><br>
+  Esa noche, una estrella fugaz cruzó el cielo justo sobre el taller y una lucecita dorada entró por la ventana, posándose sobre el pecho de Toby en forma de un pequeño colgante brillante. Al día siguiente, para sorpresa de Elías, ¡Toby abrió los ojos, se estiró y sonrió de verdad!`,
+  q:{
+    prompt:"¿Quién talló a Toby y de qué estaba hecho?",
+    options:["Elías lo talló de una rama de roble","Un mago lo compró en la feria","Toby nació de un huevo mágico"],
+    correct:0,
+    hints:["Vuelve a leer el primer párrafo de la escena.","Era un carpintero que trabajaba con madera.","Usó una rama caída por la tormenta."],
+    explicacion:"¡Exacto! El carpintero Elías talló a Toby con mucho cariño a partir de una rama de roble."
+  }
+},
+{
+  id:2,
+  resumen:"Toby conoce a Bruno, un mapache travieso, que lo invita a la feria en vez de practicar tallado.",
+  illEmoji:"🦝🪵😜",
+  illDesc:"Toby, un pequeño muñeco de madera con ojos brillantes y colgante de estrella dorada, hablando con Bruno, un mapache de antifaz oscuro y expresión pícara, junto a un cartel colorido que anuncia una feria. Fondo de bosque cerca del taller, colores otoñales.",
+  html:`Unos días después, mientras Toby practicaba a tallar pequeñas figuras con las herramientas de Elías, escuchó un ruido entre los arbustos. Era Bruno, un mapache de antifaz oscuro y sonrisa <span class="vocab" data-word="travieso">traviesa</span>. —¡Hoy llegó la <span class="vocab" data-word="feria">feria</span> al pueblo! —dijo Bruno, dando saltitos—. Hay juegos, música y un puesto de manzanas acarameladas. ¿Vienes conmigo?
+  <br><br>
+  Toby dudó. —Le prometí a Elías que practicaría tallado toda la tarde —dijo. Pero Bruno insistió, contándole maravillas sobre los juegos de la feria, y Toby, muy curioso, terminó aceptando. —Solo un ratito —se dijo a sí mismo, dejando las herramientas a medio usar sobre la mesa.`,
+  q:{
+    prompt:"¿Qué le propuso Bruno a Toby?",
+    options:["Ir juntos a la feria del pueblo","Ayudarlo a tallar madera","Construir una casa en el árbol"],
+    correct:0,
+    hints:["Bruno llegó dando saltitos con una noticia emocionante.","Hablaba de juegos, música y manzanas acarameladas.","Era algo que había llegado ese día al pueblo."],
+    explicacion:"¡Correcto! Bruno invitó a Toby a la feria que acababa de llegar al pueblo."
+  }
+},
+{
+  id:3,
+  resumen:"Toby se divierte en la feria, llega tarde y le dice una mentira a Elías; el colgante se pone opaco.",
+  illEmoji:"🎪🪵😟",
+  illDesc:"Toby de regreso al taller al anochecer, con cara de preocupación, hablando con Elías en la puerta. El colgante de estrella en su pecho se ve gris y sin brillo, en contraste con el resto de la escena cálida. Elías lo mira con gesto pensativo, no enojado.",
+  html:`Toby se divirtió muchísimo en la feria: subió a un carrusel de madera, jugó a lanzar aros y comió una manzana acaramelada. Pero cuando el sol empezó a esconderse, se dio cuenta de que había pasado toda la tarde fuera. Corrió de vuelta al taller, nervioso.
+  <br><br>
+  —¿Dónde estabas, Toby? Te busqué toda la tarde —preguntó Elías, preocupado. Toby sintió un nudo en la garganta. —Estuve... practicando cerca del río —dijo, bajando la mirada. En ese instante, el colgante de estrella que llevaba en el pecho, que siempre brillaba dorado, se puso <span class="vocab" data-word="opaco">opaco</span> y gris. Toby lo miró, sorprendido y asustado, sin entender qué había pasado.`,
+  q:{
+    prompt:"¿Qué le pasó al colgante de Toby cuando dijo que había estado practicando cerca del río?",
+    options:["Se puso opaco y gris","Se volvió más brillante","No pasó nada"],
+    correct:0,
+    hints:["Vuelve a leer el final de esta escena.","Toby no había dicho la verdad sobre dónde estuvo.","El colgante cambió de color, perdiendo su brillo dorado."],
+    explicacion:"¡Así es! El colgante mágico se puso opaco y gris justo cuando Toby dijo algo que no era verdad."
+  }
+},
+{
+  id:4,
+  resumen:"Toby confiesa la verdad a Elías, el colgante vuelve a brillar y aprende sobre la sinceridad.",
+  illEmoji:"🪵💛🧙🤗",
+  illDesc:"Toby abrazando a Elías dentro del taller, ambos sonriendo. El colgante de estrella en el pecho de Toby brilla de nuevo con luz dorada intensa. Ambiente cálido de atardecer entrando por la ventana, velas encendidas, herramientas de carpintería en las paredes.",
+  html:`Esa noche, Toby no pudo dormir. El colgante opaco le pesaba como una piedra en el pecho. Finalmente, se acercó a Elías, que tallaba en silencio junto a la chimenea. —Elías... no estuve cerca del río —dijo, con voz temblorosa—. Fui a la feria con Bruno y se me olvidó el tiempo. Perdón por no decírtelo antes.
+  <br><br>
+  Elías dejó su trabajo y sonrió con ternura. —Gracias por <span class="vocab" data-word="confesar">confesar</span>rlo, Toby —dijo, abrazándolo—. Todos merecemos divertirnos, solo tenías que contármelo. En ese momento, el colgante volvió a brillar dorado, más fuerte que nunca. —Lo que te hace especial no es la madera de la que estás hecho —añadió Elías—, sino tener un corazón <span class="vocab" data-word="sincero">sincero</span>.`,
+  q:{
+    prompt:"Verdadero o falso: el colgante de Toby volvió a brillar cuando confesó la verdad.",
+    options:["Verdadero","Falso"],
+    correct:0,
+    hints:["Vuelve a leer el segundo párrafo de esta escena.","Toby le contó a Elías lo que realmente había pasado.","El colgante cambió de color otra vez, pero esta vez para bien."],
+    explicacion:"¡Correcto, es verdadero! En cuanto Toby confesó la verdad, el colgante volvió a brillar dorado con más fuerza."
+  }
+}
+];
+
+const LEVEL2 = [
+  { prompt:"¿Por qué crees que Toby le dijo a Elías que había estado cerca del río en vez de contarle la verdad?", hints:["Piensa en cómo se sintió Toby al llegar tarde.","¿Tenía miedo de algo?"], guia:"Muchos lectores piensan que Toby tuvo miedo de que Elías se enojara o se sintiera decepcionado, así que inventó una excusa rápida sin pensarlo bien." },
+  { prompt:"¿Qué crees que representa el colgante de estrella que se pone opaco?", hints:["Piensa en qué pasó justo cuando Toby no dijo la verdad.","¿Qué sintió Toby por dentro cuando mintió?"], guia:"Una idea común es que el colgante muestra por fuera lo que Toby sentía por dentro: la incomodidad de no ser sincero. Es como si el colgante reflejara su corazón." },
+  { prompt:"¿Por qué crees que Toby no pudo dormir esa noche?", hints:["Piensa en cómo se sentía con el colgante opaco.","¿Le gustaba tener ese peso en el pecho?"], guia:"Muchos niños piensan que Toby se sentía incómodo y culpable por la mentira, y que esa sensación no lo dejaba tranquilo hasta contar la verdad." },
+  { prompt:"¿Qué pista muestra que Elías es un adulto comprensivo y no enojón?", hints:["Piensa en cómo reaccionó cuando Toby confesó.","Fíjate en lo que le dijo después del abrazo."], guia:"Elías no gritó ni castigó a Toby: lo abrazó, le agradeció que confesara y le explicó con calma lo que de verdad importa. Eso muestra que es comprensivo." }
+];
+
+const LEVEL3 = [
+  { prompt:"¿Estás de acuerdo con la decisión de Toby de finalmente contarle la verdad a Elías?", guia:"Muchos niños piensan que fue una decisión valiente, porque no siempre es fácil admitir un error, pero hacerlo ayuda a sentirse mejor y a mantener la confianza con las personas que queremos." },
+  { prompt:"¿Qué habrías hecho tú si fueras Toby y tuvieras muchas ganas de ir a la feria, pero habías prometido practicar tallado?", guia:"No hay una única respuesta correcta: algunos dirían que primero hay que preguntar, otros que se puede avisar y luego ir. Lo importante es pensar en avisar antes de desaparecer toda la tarde." },
+  { prompt:"¿Qué enseñanza te deja este cuento sobre decir la verdad, aunque cueste trabajo?", guia:"Una idea común es que decir la verdad puede dar un poco de miedo al principio, pero después nos sentimos más tranquilos, y las personas que nos quieren suelen entendernos mejor de lo que pensamos." }
+];
+
+const CREATIVE_OPTIONS = [
+  "Dibuja cómo te imaginas el colgante de estrella de Toby, brillante y opaco.",
+  "Escribe qué le dirías tú a Toby sobre la importancia de contar la verdad.",
+  "Inventa otra travesura que Bruno el mapache podría proponerle a Toby.",
+  "Crea una continuación: ¿qué aventura vivirán juntos Toby y Elías la próxima semana?"
+];
+
+const state = { screen:"intro", sceneIndex:0, rewards:{stars:0, pages:0, lupas:0, pieces:0, badge:false}, vocabExplored:new Set(), lvl1:{}, orderArrangement:null, orderChecked:false, level2:{}, level3:{}, creativeChoice:0 };
+SCENES.forEach(s=>{ state.lvl1[s.id] = {answered:false, attempts:0, hintsShown:0, selected:null}; });
+LEVEL2.forEach((_,i)=>{ state.level2[i] = {revealed:false}; });
+LEVEL3.forEach((_,i)=>{ state.level3[i] = {revealed:false}; });
+
+function addReward(type){ state.rewards[type]++; renderRewardBar(type); }
+function renderRewardBar(justChanged){
+  const bar = document.getElementById("rewardbar");
+  const chips = [["stars","⭐", state.rewards.stars],["pages","📖", state.rewards.pages],["lupas","🔍", state.rewards.lupas],["pieces","🧩", state.rewards.pieces],["badge","🏅", state.rewards.badge ? 1 : 0]];
+  bar.innerHTML = chips.map(([key,icon,val])=> `<div class="reward-chip ${key===justChanged?'pop':''}">${icon} ${val}</div>`).join("");
+}
+function el(html){ const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstElementChild; }
+function linkVocab(container){ container.querySelectorAll(".vocab").forEach(span=>{ span.addEventListener("click", ()=>openVocabModal(span.dataset.word)); }); }
+function openVocabModal(word){
+  const v = VOCAB[word]; if(!v) return;
+  if(!state.vocabExplored.has(word)){ state.vocabExplored.add(word); addReward("pieces"); }
+  const root = document.getElementById("modalRoot"); root.innerHTML = "";
+  const overlay = el(`<div class="modal-overlay"><div class="modal"><div class="center" style="font-size:40px;">${v.emoji}</div><h3>${v.palabra}</h3><p><strong>Significado:</strong> ${v.significado}</p><p><strong>Ejemplo:</strong> "${v.ejemplo}"</p><p><strong>Palabras parecidas:</strong> ${v.sinonimos.join(", ")}</p><div class="center"><button class="btn-primary" id="closeModal">¡Entendido!</button></div></div></div>`);
+  overlay.addEventListener("click",(e)=>{ if(e.target===overlay) root.innerHTML=""; });
+  root.appendChild(overlay);
+  document.getElementById("closeModal").onclick = ()=>{ root.innerHTML=""; };
+}
+
+function render(){
+  const app = document.getElementById("app"); app.innerHTML = ""; renderRewardBar();
+  if(state.screen==="intro") app.appendChild(renderIntro());
+  else if(state.screen==="scene") app.appendChild(renderScene(state.sceneIndex));
+  else if(state.screen==="order") app.appendChild(renderOrderChallenge());
+  else if(state.screen==="level2") app.appendChild(renderLevel2());
+  else if(state.screen==="level3") app.appendChild(renderLevel3());
+  else if(state.screen==="final") app.appendChild(renderFinal());
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function renderIntro(){
+  const wrap = el(`<div class="card center"><div class="tag">Cuento interactivo · ${AGE_RANGE}</div><h1>${STORY_TITLE}</h1><div class="illustration">🪵🧙✨🦝</div><p>Elías, un carpintero, talla a un muñeco de madera llamado Toby, que cobra vida gracias a una estrella fugaz y recibe un colgante mágico que brilla con la verdad. Cuando Bruno el mapache lo invita a la feria, Toby tendrá que decidir entre divertirse a escondidas o ser sincero.</p><p>Lee cada escena con atención y descubre por qué decir la verdad hace brillar el corazón. Al final podrás ganar estrellas, lupas de detective y una insignia especial.</p><button class="btn-primary" id="startBtn">Comenzar la aventura 🪵</button></div>`);
+  wrap.querySelector("#startBtn").onclick = ()=>{ state.screen="scene"; state.sceneIndex=0; render(); };
+  return wrap;
+}
+function progressDots(total, current){ let dots = ""; for(let i=0;i<total;i++){ dots += `<div class="dot ${i<=current?'on':''}"></div>`; } return `<div class="progressdots">${dots}</div>`; }
+
+function renderScene(index){
+  const scene = SCENES[index];
+  const wrap = el(`<div>${progressDots(SCENES.length, index)}<div class="card"><div class="tag">Escena ${scene.id} de ${SCENES.length}</div><div class="illustration">${scene.illEmoji}<div class="illustration-caption">${scene.illDesc}</div></div><p id="sceneText">${scene.html}</p></div><div class="card" id="activityCard"></div></div>`);
+  linkVocab(wrap.querySelector("#sceneText"));
+  renderLvl1Activity(wrap.querySelector("#activityCard"), scene);
+  return wrap;
+}
+
+function renderLvl1Activity(container, scene){
+  const q = scene.q; const st = state.lvl1[scene.id];
+  let optsHtml = q.options.map((opt,i)=> `<button class="btn-option" data-i="${i}">${opt}</button>`).join("");
+  container.innerHTML = `<h3>🔎 Nivel 1 · Comprensión literal</h3><p>${q.prompt}</p><div id="optsWrap">${optsHtml}</div><div id="hintArea"></div><div id="feedbackArea"></div><div class="nav-row"><button class="btn-secondary" id="hintBtn">💡 Pedir una pista</button><button class="btn-primary" id="continueBtn" disabled>Continuar ➜</button></div>`;
+  const optsWrap = container.querySelector("#optsWrap"); const hintArea = container.querySelector("#hintArea"); const feedbackArea = container.querySelector("#feedbackArea"); const hintBtn = container.querySelector("#hintBtn"); const continueBtn = container.querySelector("#continueBtn");
+  function paintHints(){ hintArea.innerHTML = ""; for(let i=0;i<st.hintsShown;i++){ hintArea.appendChild(el(`<div class="hint-box">💡 Pista ${i+1}: ${q.hints[i]}</div>`)); } if(st.hintsShown >= q.hints.length){ hintBtn.disabled = true; hintBtn.textContent = "Ya usaste todas las pistas"; } }
+  function lockOptions(){ optsWrap.querySelectorAll("button").forEach(b=> b.disabled = true); }
+  function showExplanationAndUnlock(){ feedbackArea.innerHTML = `<div class="feedback good">✅ ${q.explicacion}</div>`; lockOptions(); continueBtn.disabled = false; if(!st.answered){ st.answered = true; addReward("stars"); } }
+  hintBtn.onclick = ()=>{ if(st.hintsShown < q.hints.length){ st.hintsShown++; paintHints(); } };
+  optsWrap.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      if(st.answered) return;
+      const i = Number(btn.dataset.i); st.attempts++;
+      if(i === q.correct){ btn.classList.add("correct"); showExplanationAndUnlock(); }
+      else {
+        btn.classList.add("wrong"); btn.disabled = true;
+        if(st.attempts >= 2 && st.hintsShown < q.hints.length){ st.hintsShown = Math.max(st.hintsShown, 2); paintHints(); feedbackArea.innerHTML = `<div class="feedback">Interesante idea, pero mira otra vez... aquí tienes una pista extra para ayudarte 👇</div>`; }
+        else { feedbackArea.innerHTML = `<div class="feedback">Interesante idea. Vuelve a leer con calma, seguro encuentras la pista correcta.</div>`; }
+        if(st.attempts >= q.options.length - 1){ setTimeout(showExplanationAndUnlock, 400); }
+      }
+    };
+  });
+  continueBtn.onclick = ()=>{ addReward("pages"); if(state.sceneIndex < SCENES.length - 1){ state.sceneIndex++; state.screen = "scene"; } else { state.screen = "order"; } render(); };
+  paintHints();
+}
+
+function renderOrderChallenge(){
+  if(!state.orderArrangement){ const correctOrder = SCENES.map(s=>s.id); let shuffled; do{ shuffled = [...correctOrder].sort(()=>Math.random()-0.5); } while(shuffled.join() === correctOrder.join()); state.orderArrangement = shuffled; }
+  const wrap = el(`<div class="card"><h2>🧩 Reto bonus · Ordena las escenas</h2><p>Usa las flechas para poner los sucesos del cuento en el orden correcto, del primero al último.</p><div id="orderList"></div><div id="orderFeedback"></div><div class="nav-row"><button class="btn-primary" id="checkOrderBtn">Comprobar orden</button><button class="btn-secondary" id="skipOrderBtn" style="display:none;">Continuar a la Sala de los Detectives ➜</button></div></div>`);
+  function paintList(){
+    const listDiv = wrap.querySelector("#orderList"); listDiv.innerHTML = "";
+    state.orderArrangement.forEach((sceneId, idx)=>{
+      const scene = SCENES.find(s=>s.id===sceneId);
+      const item = el(`<div class="order-item"><span class="txt"><strong>${idx+1}.</strong> ${scene.resumen}</span><button data-dir="up" data-idx="${idx}">▲</button><button data-dir="down" data-idx="${idx}">▼</button></div>`);
+      listDiv.appendChild(item);
+    });
+    listDiv.querySelectorAll("button").forEach(btn=>{
+      btn.onclick = ()=>{ const idx = Number(btn.dataset.idx); const dir = btn.dataset.dir; const arr = state.orderArrangement;
+        if(dir==="up" && idx>0){ [arr[idx-1],arr[idx]] = [arr[idx],arr[idx-1]]; }
+        if(dir==="down" && idx<arr.length-1){ [arr[idx+1],arr[idx]] = [arr[idx],arr[idx+1]]; }
+        paintList(); };
+    });
+  }
+  paintList();
+  wrap.querySelector("#checkOrderBtn").onclick = ()=>{
+    const correctOrder = SCENES.map(s=>s.id).join(); const fb = wrap.querySelector("#orderFeedback");
+    if(state.orderArrangement.join() === correctOrder){ fb.innerHTML = `<div class="feedback good">✅ ¡Perfecto! Ese es el orden correcto de la historia de Toby y Elías.</div>`; if(!state.orderChecked){ state.orderChecked = true; addReward("stars"); } wrap.querySelector("#skipOrderBtn").style.display = "inline-block"; }
+    else { fb.innerHTML = `<div class="feedback">Casi... vuelve a pensar qué pasó primero: ¿Toby cobró vida antes o después de conocer a Bruno? Usa las flechas para reordenar.</div>`; }
+  };
+  wrap.querySelector("#skipOrderBtn").onclick = ()=>{ state.screen = "level2"; render(); };
+  return wrap;
+}
+
+function renderLevel2(){
+  const wrap = el(`<div class="card"><h2>🔍 Sala de los Detectives · Nivel 2</h2><p>Ahora piensa un poco más allá del texto. No hay una sola respuesta correcta: lo importante es explicar bien tu idea. Escribe tu respuesta y luego descubre una reflexión posible.</p><div id="l2list"></div><div class="nav-row"><button class="btn-primary" id="toLevel3Btn">Ir a la Sala de la Reflexión ➜</button></div></div>`);
+  const list = wrap.querySelector("#l2list");
+  LEVEL2.forEach((q, idx)=>{
+    const block = el(`<div class="hint-box" style="border-left-color:var(--azul); background:#eef7ff;"><p><strong>${idx+1}.</strong> ${q.prompt}</p><textarea placeholder="Escribe aquí tu idea..." id="l2text-${idx}"></textarea><div class="nav-row" style="justify-content:space-between;"><button class="btn-secondary" data-hint="${idx}">💡 Pista</button><button class="btn-primary" data-reveal="${idx}">Ver una reflexión posible</button></div><div id="l2hint-${idx}"></div><div id="l2guia-${idx}"></div></div>`);
+    list.appendChild(block);
+  });
+  wrap.querySelectorAll("button[data-hint]").forEach(btn=>{
+    btn.onclick = ()=>{ const idx = Number(btn.dataset.hint); const box = wrap.querySelector(`#l2hint-${idx}`); const hints = LEVEL2[idx].hints; const shown = box.children.length; if(shown < hints.length){ box.appendChild(el(`<div class="hint-box">💡 ${hints[shown]}</div>`)); } };
+  });
+  wrap.querySelectorAll("button[data-reveal]").forEach(btn=>{
+    btn.onclick = ()=>{ const idx = Number(btn.dataset.reveal); const guiaBox = wrap.querySelector(`#l2guia-${idx}`); if(!state.level2[idx].revealed){ state.level2[idx].revealed = true; addReward("lupas"); } guiaBox.innerHTML = `<div class="feedback good">🔍 ${LEVEL2[idx].guia}</div>`; };
+  });
+  wrap.querySelector("#toLevel3Btn").onclick = ()=>{ state.screen = "level3"; render(); };
+  return wrap;
+}
+
+function renderLevel3(){
+  const wrap = el(`<div class="card"><h2>💭 Sala de la Reflexión · Nivel 3</h2><p>Estas preguntas no tienen una única respuesta correcta. Cuéntanos qué piensas de verdad.</p><div id="l3list"></div><div class="nav-row"><button class="btn-primary" id="toFinalBtn">Ir al final del cuento ➜</button></div></div>`);
+  const list = wrap.querySelector("#l3list");
+  LEVEL3.forEach((q, idx)=>{
+    const block = el(`<div class="hint-box" style="border-left-color:var(--rosa); background:#fff0f6;"><p><strong>${idx+1}.</strong> ${q.prompt}</p><textarea placeholder="Escribe tu opinión..." id="l3text-${idx}"></textarea><div class="nav-row"><button class="btn-primary" data-reveal="${idx}">Compartir mi opinión</button></div><div id="l3guia-${idx}"></div></div>`);
+    list.appendChild(block);
+  });
+  wrap.querySelectorAll("button[data-reveal]").forEach(btn=>{
+    btn.onclick = ()=>{ const idx = Number(btn.dataset.reveal); const guiaBox = wrap.querySelector(`#l3guia-${idx}`); if(!state.level3[idx].revealed){ state.level3[idx].revealed = true; addReward("lupas"); } guiaBox.innerHTML = `<div class="feedback good">💭 ${LEVEL3[idx].guia}</div>`; };
+  });
+  wrap.querySelector("#toFinalBtn").onclick = ()=>{ state.screen = "final"; if(!state.rewards.badge){ state.rewards.badge = true; } render(); };
+  return wrap;
+}
+
+function renderFinal(){
+  const wrap = el(`<div class="card center"><div class="badge-emoji">🏅</div><h2>¡Insignia de Corazón Sincero desbloqueada!</h2><p>Toby aprendió que lo que más importa no es de qué está hecho, sino tener un corazón sincero. Elías y él siguieron compartiendo tardes en el taller, ahora con toda la confianza del mundo.</p><div class="illustration">🪵💛🧙🤗</div><div style="text-align:left;"><h3>📚 Repaso de vocabulario</h3><p>Palabras nuevas que descubriste: ${Object.keys(VOCAB).map(w=>`<span class="vocab" data-word="${w}" id="rvocab-${w}">${w}</span>`).join(", ")}.</p></div><div style="text-align:left;"><h3>✏️ Actividad creativa final</h3><p>Elige un reto y escríbelo (o cuéntaselo a un adulto para dibujarlo juntos):</p><ul class="creative-list" id="creativeList"></ul><textarea id="creativeText" placeholder="Escribe aquí tu actividad creativa..."></textarea><div class="nav-row"><button class="btn-primary" id="downloadBtn">📥 Descargar mi actividad</button></div></div><div style="margin-top:18px;"><h3>🎉 Tus recompensas finales</h3><p>⭐ ${state.rewards.stars} estrellas &nbsp; 🔍 ${state.rewards.lupas} lupas &nbsp; 🧩 ${state.rewards.pieces} piezas &nbsp; 📖 ${state.rewards.pages} páginas &nbsp; 🏅 1 insignia</p></div><div class="nav-row" style="justify-content:center; margin-top:10px;"><button class="btn-secondary" id="restartBtn">Volver a jugar desde el inicio</button></div><p class="small">Gracias por leer con atención, ¡nos vemos en la próxima aventura de Toby!</p></div>`);
+  Object.keys(VOCAB).forEach(w=>{ wrap.querySelector(`#rvocab-${w}`).addEventListener("click", ()=>openVocabModal(w)); });
+  const creativeListEl = wrap.querySelector("#creativeList");
+  CREATIVE_OPTIONS.forEach((opt,i)=>{ creativeListEl.appendChild(el(`<li><label><input type="radio" name="creative" ${i===0?"checked":""} value="${i}"> ${opt}</label></li>`)); });
+  creativeListEl.querySelectorAll("input[name='creative']").forEach(r=>{ r.onchange = ()=>{ state.creativeChoice = Number(r.value); }; });
+  wrap.querySelector("#downloadBtn").onclick = ()=>{
+    const text = wrap.querySelector("#creativeText").value.trim(); const chosen = CREATIVE_OPTIONS[state.creativeChoice];
+    const content = `Mi actividad creativa - ${STORY_TITLE}\n\nReto elegido: ${chosen}\n\nMi respuesta:\n${text || "(sin escribir todavía)"}\n`;
+    const blob = new Blob([content], {type:"text/plain;charset=utf-8"}); const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "mi-actividad-creativa.txt";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
+  wrap.querySelector("#restartBtn").onclick = ()=>{ location.reload(); };
+  return wrap;
+}
+
+render();
+</script>
+</body>
+</html>
